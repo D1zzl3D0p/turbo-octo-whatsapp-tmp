@@ -19,9 +19,37 @@ check_snowsql() {
     fi
 }
 
+_snowsql_connect_args() {
+    local args=(
+        --accountname="$SNOWSQL_ACCOUNT"
+        --username="$SNOWSQL_USER"
+        --private-key-path="$SNOWSQL_PRIVATE_KEY_PATH"
+        --warehouse="$SNOWSQL_WAREHOUSE"
+        --dbname="$SNOWSQL_DATABASE"
+        --schemaname="$SNOWSQL_SCHEMA"
+    )
+    echo "${args[@]}"
+}
+
+_validate_snowflake_env() {
+    local missing=()
+    for var in SNOWSQL_ACCOUNT SNOWSQL_USER SNOWSQL_PRIVATE_KEY_PATH SNOWSQL_WAREHOUSE SNOWSQL_DATABASE SNOWSQL_SCHEMA SNOWSQL_STAGE; do
+        [ -z "${!var}" ] && missing+=("$var")
+    done
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo "Error: Missing Snowflake env vars: ${missing[*]}"
+        exit 1
+    fi
+    if [ ! -f "$SNOWSQL_PRIVATE_KEY_PATH" ]; then
+        echo "Error: Private key not found: $SNOWSQL_PRIVATE_KEY_PATH"
+        exit 1
+    fi
+}
+
 upload() {
     load_env
     check_snowsql
+    _validate_snowflake_env
 
     local parquet_file="${1:-./parquet/messages.parquet}"
 
@@ -30,24 +58,11 @@ upload() {
         exit 1
     fi
 
-    local host="${SNOWSQL_HOST}"
-    local user="${SNOWSQL_USER}"
-    local private_key="${SNOWSQL_PRIVATE_KEY_PATH}"
-    local database="${SNOWSQL_DATABASE}"
-    local schema="${SNOWSQL_SCHEMA}"
-    local stage="${SNOWSQL_STAGE}"
+    echo "Uploading $parquet_file to @${SNOWSQL_DATABASE}.${SNOWSQL_SCHEMA}.${SNOWSQL_STAGE}/ ..."
 
-    if [ -z "$host" ] || [ -z "$user" ] || [ -z "$private_key" ]; then
-        echo "Error: Snowflake credentials not configured in .env"
-        exit 1
-    fi
-
-    echo "Uploading $parquet_file to Snowflake stage..."
-
-    snowsql -q "PUT file://$(pwd)/$parquet_file @${database}.${schema}.${stage}/ auto_compress=false overwrite=true;" \
-        --host="$host" \
-        --username="$user" \
-        --private-key-path="$private_key"
+    SNOWSQL_PRIVATE_KEY_PASSPHRASE="${SNOWSQL_PRIVATE_KEY_PASSPHRASE:-}" \
+    snowsql $(_snowsql_connect_args) -q \
+        "PUT 'file://$(pwd)/$parquet_file' @${SNOWSQL_DATABASE}.${SNOWSQL_SCHEMA}.${SNOWSQL_STAGE}/ auto_compress=false overwrite=true;"
 
     echo "Upload complete."
 }
@@ -55,31 +70,23 @@ upload() {
 load() {
     load_env
     check_snowsql
+    _validate_snowflake_env
 
     local parquet_file="${1:-./parquet/messages.parquet}"
     local filename=$(basename "$parquet_file")
+    local table="${SNOWSQL_TABLE:-MESSAGES}"
+    local full_table="${SNOWSQL_DATABASE}.${SNOWSQL_SCHEMA}.${table}"
 
-    local host="${SNOWSQL_HOST}"
-    local user="${SNOWSQL_USER}"
-    local private_key="${SNOWSQL_PRIVATE_KEY_PATH}"
-    local database="${SNOWSQL_DATABASE}"
-    local schema="${SNOWSQL_SCHEMA}"
-    local stage="${SNOWSQL_STAGE}"
+    echo "Truncating ${full_table} and loading ${filename} ..."
 
-    if [ -z "$host" ] || [ -z "$user" ] || [ -z "$private_key" ]; then
-        echo "Error: Snowflake credentials not configured in .env"
-        exit 1
-    fi
-
-    echo "Loading data into Snowflake..."
-
-    snowsql -q "
-        TRUNCATE TABLE ${database}.${schema}.MESSAGES;
-        COPY INTO ${database}.${schema}.MESSAGES
-        FROM @${database}.${schema}.${stage}/${filename}
+    SNOWSQL_PRIVATE_KEY_PASSPHRASE="${SNOWSQL_PRIVATE_KEY_PASSPHRASE:-}" \
+    snowsql $(_snowsql_connect_args) -q "
+        TRUNCATE TABLE ${full_table};
+        COPY INTO ${full_table}
+        FROM @${SNOWSQL_DATABASE}.${SNOWSQL_SCHEMA}.${SNOWSQL_STAGE}/${filename}
         FILE_FORMAT = (TYPE = PARQUET)
         MATCH_BY_COLUMN_NAME = CASE_SENSITIVE;
-    " --host="$host" --username="$user" --private-key-path="$private_key"
+    "
 
     echo "Load complete."
 }

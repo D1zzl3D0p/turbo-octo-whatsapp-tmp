@@ -1,1 +1,4 @@
 tokens
+.venv
+parquet/
+backups/
