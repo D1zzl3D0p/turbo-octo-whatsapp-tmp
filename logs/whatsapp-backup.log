@@ -25437,3 +25437,43 @@
 [2026-03-26 08:55:52] [info] Load complete
 [2026-03-26 08:55:52] [info] Cleaning up parquet file: ./parquet/messages_20260326_085521.parquet
 [2026-03-26 08:55:52] [info] === Pipeline complete ===
+[2026-03-27 09:58:26] [info] Started
+[2026-03-27 09:58:26] [info] === Running full pipeline ===
+[2026-03-27 09:58:26] [info] === Step 1: Download ===
+[2026-03-27 09:58:26] [info] Downloading WhatsApp backup...
+[2026-03-27 09:58:43] [info] Download complete
+[2026-03-27 09:58:43] [info] === Step 2: Decrypt ===
+[2026-03-27 09:58:43] [info] Decrypting backup: ./backups
+[2026-03-27 09:58:44] [info] Decryption complete: ./backups-decrypted
+[2026-03-27 09:58:44] [info] Decrypted directory: ./backups-decrypted
+[2026-03-27 09:58:44] [info] === Step 3: Transform ===
+[2026-03-27 09:58:45] [info] Cleaning up decrypted backup: ./backups-decrypted
+[2026-03-27 09:58:45] [info] Cleaning up raw encrypted backup: ./backups
+[2026-03-27 09:58:45] [info] === Step 4: Upload to Snowflake ===
+[2026-03-27 09:58:45] [info] Uploading ./parquet/messages_20260327_095844.parquet to @n8n_data.whatsapp_data.whatsapp_stage/
+[2026-03-27 09:58:54] [info] Upload complete
+[2026-03-27 09:58:54] [info] === Step 5: Load to Snowflake ===
+[2026-03-27 09:58:54] [info] Truncating n8n_data.whatsapp_data.messages and loading messages_20260327_095844.parquet
+[2026-03-27 09:59:05] [info] Load complete
+[2026-03-27 09:59:05] [info] Cleaning up parquet file: ./parquet/messages_20260327_095844.parquet
+[2026-03-27 09:59:05] [info] === Pipeline complete ===
+[2026-03-27 10:02:49] [info] Started
+[2026-03-27 10:02:49] [info] === Running full pipeline ===
+[2026-03-27 10:02:49] [info] === Step 1: Download ===
+[2026-03-27 10:02:49] [info] Downloading WhatsApp backup...
+[2026-03-27 10:03:06] [info] Download complete
+[2026-03-27 10:03:06] [info] === Step 2: Decrypt ===
+[2026-03-27 10:03:06] [info] Decrypting backup: ./backups
+[2026-03-27 10:03:06] [info] Decryption complete: ./backups-decrypted
+[2026-03-27 10:03:06] [info] Decrypted directory: ./backups-decrypted
+[2026-03-27 10:03:06] [info] === Step 3: Transform ===
+[2026-03-27 10:03:07] [info] Cleaning up decrypted backup: ./backups-decrypted
+[2026-03-27 10:03:07] [info] Cleaning up raw encrypted backup: ./backups
+[2026-03-27 10:03:07] [info] === Step 4: Upload to Snowflake ===
+[2026-03-27 10:03:07] [info] Uploading ./parquet/messages_20260327_100306.parquet to @n8n_data.whatsapp_data.whatsapp_stage/
+[2026-03-27 10:03:21] [info] Upload complete
+[2026-03-27 10:03:21] [info] === Step 5: Load to Snowflake ===
+[2026-03-27 10:03:21] [info] Truncating n8n_data.whatsapp_data.messages and loading messages_20260327_100306.parquet
+[2026-03-27 10:03:31] [info] Load complete
+[2026-03-27 10:03:31] [info] Cleaning up parquet file: ./parquet/messages_20260327_100306.parquet
+[2026-03-27 10:03:31] [info] === Pipeline complete ===

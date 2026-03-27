@@ -63,10 +63,10 @@ def transform(db_path: str, output_path: str) -> None:
         {
             "_id": "Int64",
             "chat_row_id": "Int64",
-            "from_me": "Int64",
-            "starred": "Int64",
-            "status": "Int64",
-            "broadcast": "Int64",
+            "from_me": "boolean",  # <-- Changed: Casts 0/1 to False/True
+            "starred": "boolean",  # <-- Changed: Casts 0/1 to False/True
+            "status": "Int64",  # <-- Kept as Int64 (WhatsApp status is 0-4, not boolean)
+            "broadcast": "boolean",  # <-- Changed: Casts 0/1 to False/True
             "message_type": "Int64",
         }
     )
